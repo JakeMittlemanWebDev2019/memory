@@ -13,10 +13,6 @@ class Starter extends React.Component {
     this.state = {
       lastGuess: null,
       matches: 0,
-      grid: [[false,false,false,false],
-            [false,false,false,false],
-            [false,false,false,false],
-            [false,false,false,false]],
     };
   }
 
@@ -41,91 +37,56 @@ class Starter extends React.Component {
     this.setState(state1);
   }
 
+  buttonPress(ev) {
+    // TODO: this should be "if button has been revealed"
+    // =========================
+    if (ev.target.querySelector('p').style.visibility === "hidden") {
+      let targetP = ev.target.querySelector('p');
+      let state1 = _.assign({}, this.state, {});
 
-  buttonPress(ev, id) {
-    let lastGuess = null;
-    let newGrid = this.state.grid;
-    let row = parseInt(id[0],10);
-    let column = parseInt(id[1],10);
-    let buttonPressed = document.getElementById(id);
-    if (this.state.lastGuess === null) {
-      lastGuess = id;
-      newGrid[row][column] = true;
-    } else if (document.getElementById(this.state.lastGuess).value ===
-              buttonPressed.value){
-      newGrid[row][column] = true;
-      lastGuess = null;
-    } else {
-      newGrid[parseInt(this.state.lastGuess[0],10)][parseInt(this.state.lastGuess[1],10)] = false;
+      // if this is first guess out of two
+      if (this.state.lastGuess === null) {
+        // visibility style attribution:
+        // https://www.w3schools.com/jsref/prop_style_visibility.asp
+        targetP.style.visibility = "visible";
+        // assign the guess
+        state1 = _.assign({}, this.state, { lastGuess: ev.target });
+      }
+
+      // otherwise
+      else {
+        targetP.style.visibility = "visible";
+        // check if the two guesses match
+        if (this.state.lastGuess.value === ev.target.value) {
+          targetP.style.visibility = "visible";
+          state1 = _.assign({}, this.state, {matches: this.state.matches + 1})
+        }
+        else {
+          let oldButton = this.state.lastGuess;
+          oldButton.querySelector('p').style.visibility = "hidden";
+          targetP.style.visibility = "hidden";
+          state1 = _.assign({}, this.state, { lastGuess: null });
+        }
+      }
+      if (this.state.lastGuess != null) {
+        console.log("after everything, lastGuess: " + this.state.lastGuess.id)
+      } else { console.log("after everything lastGuess is null") }
+      this.setState(state1);
     }
-    console.log(row + " " + column);
-    let state1 = _.assign({}, this.state, { grid: newGrid, lastGuess: lastGuess });
-    this.setState(state1);
   }
-
-  // buttonPress(ev) {
-  //   // TODO: this should be "if button has been revealed"
-  //   // =========================
-  //   if (ev.target.querySelector('p').style.visibility === "hidden") {
-  //     let targetP = ev.target.querySelector('p');
-  //     let state1 = _.assign({}, this.state, {});
-  //
-  //     // if this is first guess out of two
-  //     if (this.state.lastGuess === null) {
-  //       // visibility style attribution:
-  //       // https://www.w3schools.com/jsref/prop_style_visibility.asp
-  //       targetP.style.visibility = "visible";
-  //       // assign the guess
-  //       state1 = _.assign({}, this.state, { lastGuess: ev.target });
-  //     }
-  //
-  //     // otherwise
-  //     else {
-  //       targetP.style.visibility = "visible";
-  //       // check if the two guesses match
-  //       if (this.state.lastGuess.value === ev.target.value) {
-  //         targetP.style.visibility = "visible";
-  //         state1 = _.assign({}, this.state, {matches: this.state.matches + 1})
-  //       }
-  //       else {
-  //         let oldButton = this.state.lastGuess;
-  //         oldButton.querySelector('p').style.visibility = "hidden";
-  //         targetP.style.visibility = "hidden";
-  //         state1 = _.assign({}, this.state, { lastGuess: null });
-  //       }
-  //     }
-  //     if (this.state.lastGuess != null) {
-  //       console.log("after everything, lastGuess: " + this.state.lastGuess.id)
-  //     } else { console.log("after everything lastGuess is null") }
-  //     this.setState(state1);
-  //   }
-  // }
 
   render() {
     let buttonA1 = <div className="column">
-      <button id="11" value="A" onClick={() => this.buttonPress(this, "11")}>
+      <button id="A1" value="A" onClick={this.buttonPress.bind(this)}>
         <p style={{visibility: "hidden"}}>A1</p></button>
       </div>;
-    if (this.state.grid[1][1] === true) {
-      buttonA1 = <div className="column">
-        <button id="11" value="A" onClick={() => this.buttonPress(this, "11")}>
-          <p style={{visibility: "visible"}}>A1</p></button>
-        </div>;
-    }
     let buttonA2 = <div className="column">
-      <button id="12" value="A" onClick={() => this.buttonPress(this, "12")}>
+      <button id="A2" value="A" onClick={this.buttonPress.bind(this)}>
         <p style={{visibility: "hidden"}}>A2</p>
       </button>
       </div>;
-    if (this.state.grid[1][2] === true) {
-      buttonA2 = <div className="column">
-        <button id="12" value="A" onClick={() => this.buttonPress(this, "12")}>
-          <p style={{visibility: "visible"}}>A2</p>
-        </button>
-        </div>;
-    }
     let buttonA3 = <div className="column">
-      <button id="13" value = "B" onClick={this.buttonPress.bind(this)}>
+      <button value = "B" onClick={this.buttonPress.bind(this)}>
       <p style={{visibility: "hidden"}}>A3</p>
       </button>
       </div>;
