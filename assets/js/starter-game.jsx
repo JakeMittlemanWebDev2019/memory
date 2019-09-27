@@ -12,10 +12,12 @@ class Starter extends React.Component {
     super(props);
     this.state = {
       lastGuess: null,
-      buttonAssignments: // array mix function
+      buttonAssignments: [],
       completed: [],
       matches: 0,
     };
+
+    this.state.buttonAssignments = this.getButtonAssignments();
   }
 
   resetGame(ev) {
@@ -30,27 +32,47 @@ class Starter extends React.Component {
     this.setState(state1);
   }
 
+  getButtonAssignments() {
+    let letters1 = ["A", "B", "C", "D", "E", "F", "G", "H"];
+    let letters2 = ["A", "B", "C", "D", "E", "F", "G", "H"];
+    let set1 = [];
+    let set2 = [];
 
-  buttonPress(ev, id) {
-    let lastGuess = null;
-    let newGrid = this.state.grid;
-    let row = parseInt(id[0],10);
-    let column = parseInt(id[1],10);
-    let buttonPressed = document.getElementById(id);
-    if (this.state.lastGuess === null) {
-      lastGuess = id;
-      newGrid[row][column] = true;
-    } else if (document.getElementById(this.state.lastGuess).value ===
-              buttonPressed.value){
-      newGrid[row][column] = true;
-      lastGuess = null;
-    } else {
-      newGrid[parseInt(this.state.lastGuess[0],10)][parseInt(this.state.lastGuess[1],10)] = false;
+    for (let i = 0; i < 8; i++) {
+      let randLetter1 = _.sample(letters1);
+      let randLetter2 = _.sample(letters2);
+      set1.push(randLetter1);
+      set2.push(randLetter2);
+      _.remove(letters1, function(i) { return i === randLetter1; });
+      _.remove(letters2, function(i) { return i === randLetter2; });
     }
-    console.log(row + " " + column);
-    let state1 = _.assign({}, this.state, { grid: newGrid, lastGuess: lastGuess });
-    this.setState(state1);
+
+    console.log(set1.concat(set2));
+
+    return set1.concat(set2);
   }
+
+
+  // buttonPress(ev, id) {
+  //   let lastGuess = null;
+  //   let newGrid = this.state.grid;
+  //   let row = parseInt(id[0],10);
+  //   let column = parseInt(id[1],10);
+  //   let buttonPressed = document.getElementById(id);
+  //   if (this.state.lastGuess === null) {
+  //     lastGuess = id;
+  //     newGrid[row][column] = true;
+  //   } else if (document.getElementById(this.state.lastGuess).value ===
+  //             buttonPressed.value){
+  //     newGrid[row][column] = true;
+  //     lastGuess = null;
+  //   } else {
+  //     newGrid[parseInt(this.state.lastGuess[0],10)][parseInt(this.state.lastGuess[1],10)] = false;
+  //   }
+  //   console.log(row + " " + column);
+  //   let state1 = _.assign({}, this.state, { grid: newGrid, lastGuess: lastGuess });
+  //   this.setState(state1);
+  // }
 
   checkEndgame() {
     let gameState = this.state.grid;
@@ -63,18 +85,17 @@ class Starter extends React.Component {
     return isOver;
   }
 
-  buttonClick(i) {
-    let thisButton = document.getElementById(i);
-    let lastButton = document.getElementById(this.state.lastGuess);
+  buttonClick(letter, id) {
     let state1 = _.assign({}, this.state, {});
     if (this.state.lastGuess === null) {
-      state1 = _.assign({}, this.state, {lastGuess: i});
+      state1 = _.assign({}, this.state, {lastGuess: [id, letter]});
       this.setState(state1);
     } else {
-      if (thisButton.value === lastButton.value) {
+      if (letter === this.state.lastGuess[1]) {
         let completed = this.state.completed;
-        completed.push(thisButton.value);
-        state1 = _.assign({}, this.state, {completed: completed});
+        completed.push(letter);
+        state1 = _.assign({}, this.state, { completed: completed,
+                                            lastGuess: null });
       }
       else {
         state1 = _.assign({}, this.state, {lastGuess: null});
@@ -97,20 +118,16 @@ class Starter extends React.Component {
       </div>
       <div className="row">
         <div className="column">
-          <BuildButtons root={this} lastGuess={this.state.lastGuess}
-          low={1} high={5} />
+          <BuildButtons root={this} low={0} high={4} />
         </div>
         <div className="column">
-          <BuildButtons root={this} lastGuess={this.state.lastGuess}
-          low={5} high={9}/>
+          <BuildButtons root={this} low={4} high={8}/>
         </div>
         <div className="column">
-          <BuildButtons root={this} lastGuess={this.state.lastGuess}
-          low={9} high={13}/>
+          <BuildButtons root={this} low={8} high={12}/>
         </div>
         <div className="column">
-          <BuildButtons root={this} lastGuess={this.state.lastGuess}
-          low={13} high={17}/>
+          <BuildButtons root={this} low={12} high={16}/>
         </div>
       </div>
     </div>);
@@ -133,28 +150,33 @@ function returnRandomNums(low, high) {
 
 function BuildButtons(props) {
   let {root} = props;
-  let {lastGuess} = props;
   let {low} = props;
   let {high} = props;
-  let nums = _.range(low, high);
+  let lastGuess = root.state.lastGuess;
+  let letters = _.slice(root.state.buttonAssignments, low, high);
   let completed = root.completed;
-  let letter = "A";
   // need to not have both buttons turn on at once.
-  let buttons = _.map(nums, (i) => {
+  let buttons = _.map(letters, (letter, i) => {
     // if the button's ID has been matched
     if (root.state.completed.includes(letter)) {
-      return(<button id={i} value={letter} onClick={() => root.buttonClick(i)} key={i}>{letter}</button>);
+      return(<button id={i} value={letter}
+              onClick={() => root.buttonClick(letter, i)}
+              key={i}>{letter}</button>);
     }
 
     // if the button clicked matches the last button clicked
     if (i != lastGuess) {
       return (
-        <button id={i} value={letter} onClick={() => root.buttonClick(i)} key={i}></button>
+        <button id={i} value={letter}
+              onClick={() => root.buttonClick(letter, i)}
+              key={i}></button>
       );
 
     // default case
     } else {
-      return(<button id={i} value={letter} onClick={() => root.buttonClick(i)} key={i}>{letter}</button>);
+      return(<button id={i} value={letter}
+              onClick={() => root.buttonClick(letter, i)}
+              key={i}>{letter}</button>);
     }
   });
   return buttons;
