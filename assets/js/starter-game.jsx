@@ -17,7 +17,8 @@ class Starter extends React.Component {
       lastGuess2: [],
       buttonAssignments: [],
       completed: [],
-      matches: 0,
+      freeze: false,
+      clicks: 0,
     };
 
     this.state.buttonAssignments = this.getButtonAssignments();
@@ -29,8 +30,12 @@ class Starter extends React.Component {
                                         lastGuess2: [],
                                         buttonAssignments: buttonAssignments,
                                         completed: [],
-                                        matches: 0, })
+                                        clicks: 0, })
     this.setState(state1);
+  }
+
+  getClicks() {
+    return this.state.clicks;
   }
 
   getButtonAssignments() {
@@ -66,27 +71,36 @@ class Starter extends React.Component {
 
   buttonClick(letter, id) {
     // console.log("id: " + id + " " + "letter: " + letter);
-    let state1 = _.assign({}, this.state, {});
-    if (this.state.lastGuess.length === 0) {
-      state1 = _.assign({}, this.state, {lastGuess: [id, letter]});
-      this.setState(state1);
-    } else {
-      if (letter === this.state.lastGuess[1]) {
-        let completed = this.state.completed;
-        completed.push(letter);
-        state1 = _.assign({}, this.state, { completed: completed,
-                                            lastGuess: [],
-                                            lastGuess2: [] });
+    if (id != this.state.lastGuess[0]) {
+      let clicks = this.state.clicks + 1;
+      let state1 = _.assign({}, this.state, {});
+      if (this.state.lastGuess.length === 0) {
+        state1 = _.assign({}, this.state, {lastGuess: [id, letter],
+                                            clicks: clicks});
         this.setState(state1);
-      }
-      else {
-        state1 = _.assign({}, this.state, { lastGuess2: [id, letter] });
-        let state2 = _.assign({}, this.state, { lastGuess: [],
-                                                lastGuess2: [] });
+      } else {
+        if (letter === this.state.lastGuess[1]) {
+          let completed = this.state.completed;
+          completed.push(letter);
+          state1 = _.assign({}, this.state, { completed: completed,
+                                              lastGuess: [],
+                                              lastGuess2: [],
+                                              clicks: clicks });
+          this.setState(state1);
+        }
+        else {
+          state1 = _.assign({}, this.state, { lastGuess2: [id, letter],
+                                              clicks: clicks,
+                                              freeze: true });
+          let state2 = _.assign({}, this.state, { lastGuess: [],
+                                                  lastGuess2: [],
+                                                  clicks: clicks,
+                                                  freeze: false});
 
-        this.setState(state1);
-        // attribution: https://tinyurl.com/y5stx57r
-        setTimeout(function(){ this.setState(state2); }.bind(this),1000);
+          this.setState(state1);
+          // attribution: https://tinyurl.com/y5stx57r
+          setTimeout(() => this.setState(state2),1000);
+        }
       }
     }
   }
@@ -94,6 +108,7 @@ class Starter extends React.Component {
 
 
   render() {
+    let clicks = this.getClicks();
     return (
     <div className="wrapper">
       <div className="row">
@@ -114,6 +129,9 @@ class Starter extends React.Component {
         <div className="column">
           <BuildButtons root={this} low={12} high={16}/>
         </div>
+      </div>
+      <div>
+        <p id="numClicks" ><b>Number of clicks: {clicks}</b></p>
       </div>
     </div>);
   }
@@ -136,16 +154,27 @@ function BuildButtons(props) {
               key={ids[i]}><p>{letter}</p></button>);
 
     } else if (ids[i] === lastGuess[0] || ids[i] === lastGuess2[0]) {
-      return (<button id={ids[i]} value={letter}
+      // if freeze, no clickable event
+      if (root.state.freeze) {
+        return (<button id={ids[i]} value={letter}
+          key={ids[i]}><p>{letter}</p></button>);
+      } else {
+        return (<button id={ids[i]} value={letter}
           onClick={() => root.buttonClick(letter, ids[i])}
           key={ids[i]}><p>{letter}</p></button>);
+      }
     // default case
     } else {
-      return (
-        <button id={ids[i]} value={letter}
+      if (root.state.freeze) {
+        return (<button id={ids[i]} value={letter}
+              key={ids[i]}><p style={{visibility: "hidden"}}>{letter}</p>
+              </button>);
+      } else {
+        return (<button id={ids[i]} value={letter}
               onClick={() => root.buttonClick(letter, ids[i])}
               key={ids[i]}><p style={{visibility: "hidden"}}>{letter}</p>
               </button>);
+      }
     }
   });
   return buttons;
