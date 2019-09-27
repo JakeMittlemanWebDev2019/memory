@@ -11,7 +11,10 @@ class Starter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lastGuess: null,
+      // should be [id, letter]
+      // or null
+      lastGuess: [],
+      lastGuess2: [],
       buttonAssignments: [],
       completed: [],
       matches: 0,
@@ -20,15 +23,13 @@ class Starter extends React.Component {
     this.state.buttonAssignments = this.getButtonAssignments();
   }
 
-  resetGame(ev) {
-    let state1 = _.assign({}, this.state, { lastGuess: null, matches: 0, })
-    let buttons = document.getElementsByTagName('button');
-    buttons = Array.from(buttons);
-    buttons.forEach(function (b){
-      if (b.id != "reset") {
-        b.querySelector('p').style.visibility = "hidden";
-      }
-    });
+  resetGame() {
+    let buttonAssignments = this.getButtonAssignments();
+    let state1 = _.assign({}, this.state, { lastGuess: [],
+                                        lastGuess2: [],
+                                        buttonAssignments: buttonAssignments,
+                                        completed: [],
+                                        matches: 0, })
     this.setState(state1);
   }
 
@@ -52,28 +53,6 @@ class Starter extends React.Component {
     return set1.concat(set2);
   }
 
-
-  // buttonPress(ev, id) {
-  //   let lastGuess = null;
-  //   let newGrid = this.state.grid;
-  //   let row = parseInt(id[0],10);
-  //   let column = parseInt(id[1],10);
-  //   let buttonPressed = document.getElementById(id);
-  //   if (this.state.lastGuess === null) {
-  //     lastGuess = id;
-  //     newGrid[row][column] = true;
-  //   } else if (document.getElementById(this.state.lastGuess).value ===
-  //             buttonPressed.value){
-  //     newGrid[row][column] = true;
-  //     lastGuess = null;
-  //   } else {
-  //     newGrid[parseInt(this.state.lastGuess[0],10)][parseInt(this.state.lastGuess[1],10)] = false;
-  //   }
-  //   console.log(row + " " + column);
-  //   let state1 = _.assign({}, this.state, { grid: newGrid, lastGuess: lastGuess });
-  //   this.setState(state1);
-  // }
-
   checkEndgame() {
     let gameState = this.state.grid;
     let isOver = true;
@@ -86,8 +65,9 @@ class Starter extends React.Component {
   }
 
   buttonClick(letter, id) {
+    // console.log("id: " + id + " " + "letter: " + letter);
     let state1 = _.assign({}, this.state, {});
-    if (this.state.lastGuess === null) {
+    if (this.state.lastGuess.length === 0) {
       state1 = _.assign({}, this.state, {lastGuess: [id, letter]});
       this.setState(state1);
     } else {
@@ -95,25 +75,30 @@ class Starter extends React.Component {
         let completed = this.state.completed;
         completed.push(letter);
         state1 = _.assign({}, this.state, { completed: completed,
-                                            lastGuess: null });
+                                            lastGuess: [],
+                                            lastGuess2: [] });
+        this.setState(state1);
       }
       else {
-        state1 = _.assign({}, this.state, {lastGuess: null});
+        state1 = _.assign({}, this.state, { lastGuess2: [id, letter] });
+        let state2 = _.assign({}, this.state, { lastGuess: [],
+                                                lastGuess2: [] });
+
+        this.setState(state1);
+        // attribution: https://tinyurl.com/y5stx57r
+        setTimeout(function(){ this.setState(state2); }.bind(this),1000);
       }
-      this.setState(state1);
     }
   }
 
 
 
   render() {
-    let resetButton = <button>DoesNothing</button>;
-
     return (
     <div className="wrapper">
       <div className="row">
         <div className="column">
-          {resetButton}
+          <button onClick={this.resetGame.bind(this)}>Reset Game</button>
         </div>
       </div>
       <div className="row">
@@ -134,49 +119,33 @@ class Starter extends React.Component {
   }
 }
 
-function returnRandomNums(low, high) {
-  let nums = []
-
-  for (let i = 0; i < 5; i++) {
-    let val = _.random(low, high);
-
-    while (nums.includes(val)) {
-      val = _.random(low, high);
-    }
-    nums.push(val)
-  }
-  return nums
-}
-
 function BuildButtons(props) {
   let {root} = props;
   let {low} = props;
   let {high} = props;
   let lastGuess = root.state.lastGuess;
+  let lastGuess2 = root.state.lastGuess2;
+  let ids = _.range(low, high);
   let letters = _.slice(root.state.buttonAssignments, low, high);
   let completed = root.completed;
   // need to not have both buttons turn on at once.
   let buttons = _.map(letters, (letter, i) => {
     // if the button's ID has been matched
     if (root.state.completed.includes(letter)) {
-      return(<button id={i} value={letter}
-              onClick={() => root.buttonClick(letter, i)}
-              key={i}>{letter}</button>);
-    }
+          return (<button id={ids[i]} value={letter} disabled
+              key={ids[i]}><p>{letter}</p></button>);
 
-    // if the button clicked matches the last button clicked
-    if (i != lastGuess) {
-      return (
-        <button id={i} value={letter}
-              onClick={() => root.buttonClick(letter, i)}
-              key={i}></button>
-      );
-
+    } else if (ids[i] === lastGuess[0] || ids[i] === lastGuess2[0]) {
+      return (<button id={ids[i]} value={letter}
+          onClick={() => root.buttonClick(letter, ids[i])}
+          key={ids[i]}><p>{letter}</p></button>);
     // default case
     } else {
-      return(<button id={i} value={letter}
-              onClick={() => root.buttonClick(letter, i)}
-              key={i}>{letter}</button>);
+      return (
+        <button id={ids[i]} value={letter}
+              onClick={() => root.buttonClick(letter, ids[i])}
+              key={ids[i]}><p style={{visibility: "hidden"}}>{letter}</p>
+              </button>);
     }
   });
   return buttons;

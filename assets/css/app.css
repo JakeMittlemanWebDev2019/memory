@@ -3,7 +3,11 @@
 @import "~milligram/dist/milligram";
 
 .row {
-  width: 30%;
+  width: 13%;
+}
+
+.column {
+  margin-right: 13px;
 }
 
 .wrapper {
@@ -11,16 +15,10 @@
   width: 50%
 }
 
-button {
-  width: 120%;
-  height: 120%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-button > p {
+/* button > p {
   text-align: center;
+  font-size: 72px;
   padding: 0px;
   margin-left: auto;
   margin-right: auto;
-}
+} */
