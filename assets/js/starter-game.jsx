@@ -70,16 +70,23 @@ class Starter extends React.Component {
   }
 
   buttonClick(letter, id) {
-    // console.log("id: " + id + " " + "letter: " + letter);
+    // this prevents against clicking the same button
+    // twice
     if (id != this.state.lastGuess[0]) {
       let clicks = this.state.clicks + 1;
       let state1 = _.assign({}, this.state, {});
+
+      // if this is your first click of a pair of two tiles
       if (this.state.lastGuess.length === 0) {
         state1 = _.assign({}, this.state, {lastGuess: [id, letter],
                                             clicks: clicks});
         this.setState(state1);
+
+      // otherwise:
       } else {
+        // if you made a match
         if (letter === this.state.lastGuess[1]) {
+          // push the shared title letter to the completed array
           let completed = this.state.completed;
           completed.push(letter);
           state1 = _.assign({}, this.state, { completed: completed,
@@ -88,10 +95,14 @@ class Starter extends React.Component {
                                               clicks: clicks });
           this.setState(state1);
         }
+
+        // otherwise, set the
         else {
+          // state where we reveal the second button
           state1 = _.assign({}, this.state, { lastGuess2: [id, letter],
                                               clicks: clicks,
                                               freeze: true });
+
           let state2 = _.assign({}, this.state, { lastGuess: [],
                                                   lastGuess2: [],
                                                   clicks: clicks,
@@ -153,6 +164,7 @@ function BuildButtons(props) {
           return (<button id={ids[i]} value={letter} disabled
               key={ids[i]}><p>{letter}</p></button>);
 
+    // if the tile has been guessed/clicked
     } else if (ids[i] === lastGuess[0] || ids[i] === lastGuess2[0]) {
       // if freeze, no clickable event
       if (root.state.freeze) {
