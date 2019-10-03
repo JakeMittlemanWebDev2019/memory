@@ -1,1 +1,11 @@
 <p>Please enter a game name</p>
+<input id="test" type="text" rel="noreferrer">
+<button onClick={getName()}>Submit</button>
+
+<script>
+function getName(){
+    var url = "http://localhost:4000/games/" +
+                document.getElementById("test").value;
+    window.location.href = action_src;
+}
+</script>

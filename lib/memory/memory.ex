@@ -11,37 +11,46 @@ defmodule Memory.Game do
     }
   end
 
+  def reset_game() do
+    new()
+  end
+
   def client_view(game) do
     %{
       completed: game.completed,
       skeleton: genSkel(game),
       freeze: game.freeze,
       clicks: game.clicks,
+      lastGuess: game.lastGuess,
+      lastGuess2: game.lastGuess2
     }
   end
 
-  def click(game, id, letter) do
+  def click(game, id) do
     # update clicks
-
+    assignments = game.assignments;
+    letter = Enum.at(assignments, id);
     lastGuess = game.lastGuess
-    if (length(lastGuess) === 0) do
-      Map.put(game, :lastGuess, [id, letter])
+    lastGuess2 = game.lastGuess2
+    clicks = game.clicks + 1
+
+    if (length(lastGuess) === 0 || length(lastGuess2) != 0) do
+      Map.merge(game, %{lastGuess: [id, letter], lastGuess2: [],
+                        clicks: clicks})
 
     else
-      if letter === tl lastGuess do
+      # this works
+      if to_string(tl lastGuess) === letter do
         completed = game.completed
         completed = [letter | completed]
-        lastGuess = []
-        lastGuess2 = []
 
         Map.merge(game, %{completed: completed,
                           lastGuess: [],
-                          lastGuess2: [] })
-        # Map.put(game, :completed, completed)
-        # Map.put(game, :lastGuess, [])
-        # Map.put(game, :lastGuess2, [])
+                          lastGuess2: [],
+                          clicks: clicks})
       else
-        Map.put(game, :lastGuess2, [id, letter])
+        # the delay needs to go here
+        Map.merge(game, %{lastGuess2: [id, letter], clicks: clicks})
       end
     end
   end

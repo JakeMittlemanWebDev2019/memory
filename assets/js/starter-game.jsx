@@ -39,17 +39,25 @@ class Starter extends React.Component {
   }
 
   update({game}) {
-    this.setState(game);
+    let lastGuess = game.lastGuess;
+    let lastGuess2 = game.lastGuess2;
+    if (lastGuess[1] != lastGuess[2] &&
+        lastGuess.length > 0 && lastGuess2.length > 0) {
+      let newSkel = this.state.skeleton;
+      newSkel[game.lastGuess[0]] = " ";
+      newSkel[game.lastGuess2[0]] = " ";
+      let state1 = _.assign({}, game, {freeze: true});
+      let state2 = _.assign({}, game, {lastGuess: [], lastGuess2: [],
+                                      skeleton: newSkel});
+      this.setState(state1);
+      setTimeout(() => this.setState(state2),1000);
+    } else {
+      this.setState(game);
+    }
   }
 
   resetGame() {
-    let buttonAssignments = this.getButtonAssignments();
-    let state1 = _.assign({}, this.state, { lastGuess: [],
-                                        lastGuess2: [],
-                                        buttonAssignments: buttonAssignments,
-                                        completed: [],
-                                        clicks: 0, })
-    this.setState(state1);
+    this.channel.push("reset").receive("ok", this.update.bind(this));
   }
 
   getClicks() {
@@ -75,8 +83,7 @@ class Starter extends React.Component {
   // }
 
   buttonClick(letter, id) {
-
-    this.channel.push("click", { lett: letter, i: id })
+    this.channel.push("click", { i: id })
                 .receive("ok", this.update.bind(this));
     // // this prevents against clicking the same button
     // // twice
@@ -128,6 +135,8 @@ class Starter extends React.Component {
 
   render() {
     let clicks = this.getClicks();
+    // console.log(this.state.skeleton);
+    // console.log(this.state.completed);
     return (
     <div className="wrapper">
       <div className="row">
@@ -156,10 +165,6 @@ class Starter extends React.Component {
   }
 }
 
-function test(param) {
-  return param;
-}
-
 function BuildButtons(props) {
   let {root} = props;
   let {low} = props;
@@ -169,10 +174,24 @@ function BuildButtons(props) {
   let ids = _.range(low, high);
   let letters = _.slice(root.state.skeleton, low, high);
   let buttons = _.map(letters, (letter, i) => {
-    console.log(letter);
-    return (<button id={i} value={letter}
+    if (root.state.freeze) {
+      if (root.state.completed.includes(letter)) {
+        return (<button id={ids[i]} value={letter} disabled
+          onClick={() => root.buttonClick(letter, ids[i])}
+          key={ids[i]}><p>{letter}</p></button>);
+      } else {
+        return (<button id={ids[i]} value={letter}
+          key={ids[i]}><p>{letter}</p></button>);
+      }
+    }
+    else if (root.state.completed.includes(letter)) {
+      return (<button id={ids[i]} value={letter} disabled
+        onClick={() => root.buttonClick(letter, ids[i])}
+        key={ids[i]}><p>{letter}</p></button>);
+    }
+    return (<button id={ids[i]} value={letter}
       onClick={() => root.buttonClick(letter, ids[i])}
-      key={i}><p>{letter}</p></button>);
+      key={ids[i]}><p>{letter}</p></button>);
   });
   return buttons;
 
