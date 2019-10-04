@@ -55,6 +55,10 @@ class Starter extends React.Component {
                 .receive("ok", this.update.bind(this));
   }
 
+  getClicks() {
+    return this.state.clicks
+  }
+
 
 
   render() {
