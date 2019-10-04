@@ -4,6 +4,8 @@
 
 <script>
 function getName(){
+    // attribution:
+    // https://www.w3schools.com/howto/howto_js_redirect_webpage.asp
     var url = "http://memory2.paperdogg.com/games/" +
                 document.getElementById("test").value;
     window.location.href = url;
