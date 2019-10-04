@@ -27,19 +27,23 @@ defmodule Memory.Game do
   end
 
   def click(game, id) do
-    # update clicks
+    # get the assignments, the letter
+    # and the lastGuess and lastGuess2
     assignments = game.assignments;
     letter = Enum.at(assignments, id);
     lastGuess = game.lastGuess
     lastGuess2 = game.lastGuess2
     clicks = game.clicks + 1
 
+    # If this is the first guess or the first guess after trying
+    # to make a match
     if (length(lastGuess) === 0 || length(lastGuess2) != 0) do
       Map.merge(game, %{lastGuess: [id, letter], lastGuess2: [],
                         clicks: clicks})
 
+    # otherwise
     else
-      # this works
+      # if you made a match update the completed array
       if to_string(tl lastGuess) === letter do
         completed = game.completed
         completed = [letter | completed]
