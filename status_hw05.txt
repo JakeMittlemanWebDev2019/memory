@@ -1,0 +1,45 @@
+Please fill in answers to the questions below:
+
+
+1. What's your name?
+Jake Mittleman
+
+
+
+
+2. What's the URL of the github repo with your work for this HW?
+https://github.com/JakeMittlemanWebDev2019/memory
+
+
+
+
+3. What's the URL that you deployed to?
+memory2.paperdogg.com
+
+
+
+
+4. Is your game functionality complete, with the appropriate logic implemented
+as server-side elixir code? If not, what's missing?
+It should be fully functional...unless I missed something.
+
+
+
+
+5. Is your game properly deployed? If not, what went wrong?
+It is
+
+
+
+
+
+
+And here's a list of tasks for grading comments. Just leave this here:
+ - Development
+ - Deployment
+ - Submission
+ - AA
+ - BB
+ - CC
+
+
