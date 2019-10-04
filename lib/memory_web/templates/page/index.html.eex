@@ -6,6 +6,6 @@
 function getName(){
     var url = "http://localhost:4000/games/" +
                 document.getElementById("test").value;
-    window.location.href = action_src;
+    window.location.href = url;
 }
 </script>
